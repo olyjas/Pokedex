@@ -329,16 +329,19 @@
    *                        the pokemon data API, containing the pokemon information.
    * @param {String} p1HealthPercentage A string representation of player 1's HP
    * @param {String} p2HealthPercentage A string representation of player 2's HP
+   * @return {boolean} true if player 1 won the game, false if player 1 lost the game
    */
   function isGameOver(p2Data, p1HealthPercentage, p2HealthPercentage) {
     if (p1HealthPercentage === 0) {
       let heading = qs('h1');
       heading.textContent = 'You lost!';
       endGame();
+      return false;
     } else if (p2HealthPercentage === 0) {
       let heading = qs('h1');
       heading.textContent = 'You won!';
       endGame(p2Data);
+      return true;
     }
   }
 
@@ -381,14 +384,16 @@
     let heading = qs('h1');
     heading.textContent = 'Your Pokedex';
     resetHealthBar();
-    let addedPokemonShortname = p2Data.shortname;
-    let addedPokemonSprite = id(addedPokemonShortname);
-    if (!addedPokemonSprite.classList.contains('found')) {
-      addedPokemonSprite.classList.add('found');
+    if (isGameOver === true) {
+      let addedPokemonShortname = p2Data.shortname;
+      let addedPokemonSprite = id(addedPokemonShortname);
+      if (!addedPokemonSprite.classList.contains('found')) {
+        addedPokemonSprite.classList.add('found');
+      }
+      addedPokemonSprite.addEventListener('click', () => {
+        cardRequest(addedPokemonShortname);
+      });
     }
-    addedPokemonSprite.addEventListener('click', () => {
-      cardRequest(addedPokemonShortname);
-    });
   }
 
   /**
