@@ -16,6 +16,8 @@
   let currentPokemonShortName;
   let gameId;
   let playerId;
+  let p1CurrentHp;
+  let wonOrLost;
 
   window.addEventListener('load', init);
 
@@ -306,7 +308,7 @@
     let p2Data = data.p2;
     let p1HealthBar = qs('#p1 .health-bar');
     let p2HealthBar = qs('#p2 .health-bar');
-    let p1CurrentHp = p1Data['current-hp'];
+    p1CurrentHp = p1Data['current-hp'];
     let p1TotalHp = p1Data.hp;
     let p2CurrentHp = p2Data['current-hp'];
     let p2TotalHp = p2Data.hp;
@@ -320,49 +322,49 @@
     if (p2HealthPercentage < greenHealthMinimum) {
       p2HealthBar.classList.add('low-health');
     }
-    isGameOver(p2Data, p1HealthPercentage, p2HealthPercentage);
+    isGameOver(data, p1HealthPercentage, p2HealthPercentage);
   }
 
   /**
    * A function that checks if the game is over and specifies which player won
-   * @param {Object} p2Data The p2 object within the object from the cardRequest function from
-   *                        the pokemon data API, containing the pokemon information.
+   * @param {Object} data The data object from the cardRequest function from
+   *                      the pokemon data API, containing the pokemon information.
    * @param {String} p1HealthPercentage A string representation of player 1's HP
    * @param {String} p2HealthPercentage A string representation of player 2's HP
-   * @return {boolean} true if player 1 won the game, false if player 1 lost the game
    */
-  function isGameOver(p2Data, p1HealthPercentage, p2HealthPercentage) {
+  function isGameOver(data, p1HealthPercentage, p2HealthPercentage) {
     if (p1HealthPercentage === 0) {
       let heading = qs('h1');
       heading.textContent = 'You lost!';
-      endGame();
-      return false;
+      endGame(data);
+      wonOrLost = false;
     } else if (p2HealthPercentage === 0) {
       let heading = qs('h1');
       heading.textContent = 'You won!';
-      endGame(p2Data);
-      return true;
+      wonOrLost = true;
+      endGame(data);
     }
   }
 
   /**
    * A function that updates the game to accomodate its state regarding the fact that it has ended.
    * Establishes a button that takes the user back to the pokedex landing page.
-   * @param {Object} p2Data The p2 object within the object from the cardRequest function from
+   * @param {Object} data The data object from the cardRequest function from
    *                        the pokemon data API, containing the pokemon information.
    */
-  function endGame(p2Data) {
+  function endGame(data) {
     let backToPokedexButton = id('endgame');
     backToPokedexButton.classList.remove('hidden');
     let fleeButton = id('flee-btn');
     fleeButton.classList.add('hidden');
     let p1Moves = qsa('.moves button');
+    p1CurrentHp = data.p1.hp;
     for (let i = 0; i < p1Moves.length; i++) {
 
       p1Moves[i].disabled = true;
     }
     backToPokedexButton.addEventListener('click', () => {
-      backToPokedex(p2Data);
+      backToPokedex(data.p2);
     });
   }
 
@@ -384,7 +386,7 @@
     let heading = qs('h1');
     heading.textContent = 'Your Pokedex';
     resetHealthBar();
-    if (isGameOver === true) {
+    if (wonOrLost === true) {
       let addedPokemonShortname = p2Data.shortname;
       let addedPokemonSprite = id(addedPokemonShortname);
       if (!addedPokemonSprite.classList.contains('found')) {
