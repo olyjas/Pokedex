@@ -16,7 +16,6 @@
   let currentPokemonShortName;
   let gameId;
   let playerId;
-  //let p1CurrentHp;
 
   window.addEventListener('load', init);
 
@@ -43,7 +42,9 @@
   }
 
   /**
-   * This function populates the pokedex with all
+   * This function populates the pokedex with all the sprite icons
+   * @param {String} data text content returned by the API utilized in spriteRequest
+   *                      contains all 151 Pokemon names along with their short names
    */
   function populateSprites(data) {
     let pokedexContainer = id('pokedex-view');
@@ -61,7 +62,8 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function assigns the three starter pokemon bulbasaur, charmander, and squirtle to the
+   * found class, which colorizes them and allows them to be selected for battle when the page loads
    */
   function setInitial() {
     let spriteArray = qsa('.sprite');
@@ -74,7 +76,12 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function takes in the String data that is returned from the spriteRequest function and
+   * separates all of the short names from the lines that were separated from the separate lines
+   * function and adds them to an array containing all 151 pokemons' short names
+   * @param {String} data text content returned by the API utilized in spriteRequest
+   *                      contains all 151 Pokemon names along with their short names
+   * @returns {array} an array of all 151 pokemon's short names
    */
   function separateShortNames(data) {
     let fullNameToShortNames = separateLines(data);
@@ -103,7 +110,11 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function takes in the String data that is returned from the spriteRequest function and
+   * separates all of the lines
+   * @param {String} data text content returned by the API utilized in spriteRequest
+   *                      contains all 151 Pokemon names along with their short names
+   * @returns {array} an array of all 151 lines from the text content of data
    */
   function separateLines(data) {
     let fullNameToShortNames = [];
@@ -129,16 +140,14 @@
     return fullNameToShortNames;
   }
 
-    /**
-   * JSDOC COMMENT FILL IN LATER
+  /**
+   * This function makes all of the sprite elements that have the found class attached, which
+   * colorizes them and makes them clickable and thus able to use in battle
    */
   function makeFoundSpritesClickable() {
     let foundSprites = qsa('.found');
-    console.log(foundSprites);
     for (let i = 0; i < foundSprites.length; i++) {
       let currPokemonShortName = foundSprites[i].id;
-      console.log(currPokemonShortName);
-      console.log(foundSprites[i].id);
       foundSprites[i].addEventListener('click', () => {
         cardRequest(currPokemonShortName);
       });
@@ -146,17 +155,23 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   *
+   * This function uses the fetch() functon and goes through
+   * a series of .then statements to ultimately execute a function
+   * that populates the card of the pokemon that is selected for battle.
+   * It also enables a button to start the battle.
+   * @param {String} currPokemonShortName the short name of the specific pokemon that is selected.
+   *                                      It is needed as a parameter of the URL that will be
+   *                                      fetched to obtain an object of details of the pokemon
+   *                                      that will end up being passed in different functions
    */
   function cardRequest(currPokemonShortName) {
     currentPokemonShortName = currPokemonShortName;
-    console.log(currentPokemonShortName);
     let url = POKEMON_NAMES_URL + '?pokemon=' + currPokemonShortName;
     fetch(url)
       .then(statusCheck)
       .then((resp) => resp.json())
       .then((resp) => {
-        console.log(resp);
         populateCardInfo(resp, 'p1');
       })
       .catch(console.error);
@@ -169,37 +184,34 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   *   /**
+   * This function populates the card of the selected pokemon with information
+   * @param {Object} data The response data from the cardRequest function from the pokemon data API,
+   *                      containing the pokemon information.
+   * @param {String} pToPopulate A String that will be concatenated to a # to specify if the card
+   *                             that is populating is for p1 or p2
    */
   function populateCardInfo(data, pToPopulate) {
-
-    //let cardContainer = id('pToPopulate');
     let cardInfoObject = data.info;
     let nameOnCard = qs('#' + pToPopulate + ' .name');
     nameOnCard.textContent = data.name;
-    console.log(nameOnCard);
     let imageOnCard = qs('#' + pToPopulate + ' .pokepic');
     imageOnCard.src = IMG_PREPEND_URL + "images/" + data.shortname + ".jpg";
     let typeOnCard = qs('#' + pToPopulate + ' .type');
     typeOnCard.src = IMG_PREPEND_URL + "icons/" + cardInfoObject.type + ".jpg";
-    console.log(typeOnCard.src);
     let weaknessOnCard = qs('#' + pToPopulate + ' .weakness');
     weaknessOnCard.src = IMG_PREPEND_URL + "icons/" + cardInfoObject.weakness + ".jpg";
-    console.log(weaknessOnCard.src);
     let hpOnCard = qs('#' + pToPopulate + ' .hp');
     hpOnCard.textContent = data.hp + "HP";
     let descriptionOnCard = qs('#' + pToPopulate + ' .info');
-    console.log(descriptionOnCard);
     descriptionOnCard.textContent = cardInfoObject.description;
-    console.log(descriptionOnCard.textContent);
     populateMovesInfo(data, pToPopulate);
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function generates the view for when a pokemon has been selected for battle
    */
   function generateMainView() {
-    console.log("went into generateMainView function");
     id('pokedex-view').classList.add('hidden');
     id('p2').classList.remove('hidden');
     qs('.hp-info').classList.remove('hidden');
@@ -216,19 +228,23 @@
         moveButtons[i].disabled = false;
         moveButtons[i].addEventListener('click', function() {
           let moveName = this.querySelector('.move').textContent;
-          console.log(moveName);
           gamePlayRequest(gameId, playerId, moveName);
         });
       }
       let heading = qs('h1');
       heading.textContent = 'Pokemon Battle!';
-      console.log(currentPokemonShortName);
       initializeGameRequest();
     }
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   *
+   * This function uses the fetch() functon and post request and goes through
+   * a series of .then statements to ultimately execute a function
+   * that generates the game play between the players when a move is selected
+   * @param {String} guid String depiction of the unqiue game ID generated by the API
+   * @param {String} pid String depiction of the unqiue player ID generated by the API
+   * @param {String} moveName String depiction of the move name clicked by the user
    */
   function gamePlayRequest(guid, pid, moveName) {
     id('loading').classList.remove('hidden');
@@ -238,8 +254,6 @@
       moveNameWithoutSpaces += letters[i];
     }
     moveName = moveNameWithoutSpaces.toLowerCase();
-    console.log(moveName);
-    console.log('went into gamePlayRequest function');
     let params = new FormData();
     params.append("guid", guid);
     params.append("pid", pid);
@@ -253,15 +267,17 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   *
+   * This function generates the game play after a move is selected by the user, detailing what
+   * moves each player made, and calls helper functions to update the loading screen and
+   * health bars.
+   * @param {Object} data The response data from the cardRequest function from the pokemon data API,
+   *                      containing the pokemon information.
    */
   function gamePlay(data) {
-    console.log(data);
     let results = data.results;
-    console.log(results);
     id('loading').classList.add('hidden');
     let p1Move = results['p1-move'];
-    console.log(p1Move);
     let p2Move = results['p2-move'];
     let p1Result = results['p1-result'];
     let p2Result = results['p2-result'];
@@ -271,9 +287,6 @@
     id('p2-turn-results').classList.remove('hidden');
     id('p1-turn-results').textContent = 'Player 1 played ' + p1Move + ' and ' + p1Result + "!";
     id('p2-turn-results').textContent = 'Player 2 played ' + p2Move + ' and ' + p2Result + "!";
-    //if (p2Move === null || p2Result === null) {
-    //  id('p2-turn-results').classList.add('hidden');
-    //}
     updateHealthBar(data);
     if (p2Move === null || p2Result === null || p1Result === 'flee') {
       id('p2-turn-results').classList.add('hidden');
@@ -281,7 +294,10 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * A helper function for the gamePlay function that updates each player's health bar after
+   * each move.
+   * @param {Object} data The response data from the cardRequest function from the pokemon data API,
+   *                      containing the pokemon information.
    */
   function updateHealthBar(data) {
     const greenHealthMinimum = 20;
@@ -296,8 +312,6 @@
     let p2TotalHp = p2Data.hp;
     let p1HealthPercentage = (p1CurrentHp / p1TotalHp) * percentMultiply;
     let p2HealthPercentage = (p2CurrentHp / p2TotalHp) * percentMultiply;
-    console.log(p1HealthPercentage);
-    console.log(p2HealthPercentage);
     p1HealthBar.style.width = p1HealthPercentage + "%";
     p2HealthBar.style.width = p2HealthPercentage + "%";
     if (p1HealthPercentage < greenHealthMinimum) {
@@ -310,7 +324,11 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * A function that checks if the game is over and specifies which player won
+   * @param {Object} p2Data The p2 object within the object from the cardRequest function from
+   *                        the pokemon data API, containing the pokemon information.
+   * @param {String} p1HealthPercentage A string representation of player 1's HP
+   * @param {String} p2HealthPercentage A string representation of player 2's HP
    */
   function isGameOver(p2Data, p1HealthPercentage, p2HealthPercentage) {
     if (p1HealthPercentage === 0) {
@@ -324,8 +342,11 @@
     }
   }
 
-    /**
-   * JSDOC COMMENT FILL IN LATER
+  /**
+   * A function that updates the game to accomodate its state regarding the fact that it has ended.
+   * Establishes a button that takes the user back to the pokedex landing page.
+   * @param {Object} p2Data The p2 object within the object from the cardRequest function from
+   *                        the pokemon data API, containing the pokemon information.
    */
   function endGame(p2Data) {
     let backToPokedexButton = id('endgame');
@@ -334,8 +355,7 @@
     fleeButton.classList.add('hidden');
     let p1Moves = qsa('.moves button');
     for (let i = 0; i < p1Moves.length; i++) {
-      console.log(p1Moves[i]);
-      console.log('game has ended');
+
       p1Moves[i].disabled = true;
     }
     backToPokedexButton.addEventListener('click', () => {
@@ -343,8 +363,12 @@
     });
   }
 
-    /**
-   * JSDOC COMMENT FILL IN LATER
+  /**
+   * A function that updates the game to accomodate its state after the user clicks the button
+   * that will take them back to the pokedex landing page.
+   * If the user won the last battle against an unknown pokemon, it will be added to the pokedex
+   * @param {Object} p2Data The p2 object within the object from the cardRequest function from
+   *                        the pokemon data API, containing the pokemon information.
    */
   function backToPokedex(p2Data) {
     id('endgame').classList.add('hidden');
@@ -367,8 +391,9 @@
     });
   }
 
-    /**
-   * JSDOC COMMENT FILL IN LATER
+  /**
+   * A function that resets the health bar after a battle has ended in preparation for the next
+   * battle to function correctly
    */
   function resetHealthBar() {
     let p1HealthBar = qs('#p1 .health-bar');
@@ -380,7 +405,10 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function uses the fetch() functon and post request goes through
+   * a series of .then statements to ultimately execute a function
+   * that initializes the game by populating the card information of player 2 and retreiving
+   * the game and player ID's
    */
   function initializeGameRequest() {
     let params = new FormData();
@@ -395,46 +423,45 @@
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This function is executed from the intializeGameRequest Function and populates the
+   * card information of player 2 and retreiving the game and player ID's
+   * @param {Object} data The object that is retreived in JSON format from the intializeGameRequest
+   *                      function, which returns various information useful for the game play
    */
   function initializeGame(data) {
-    console.log(data);
     let p2Data = data.p2;
-    console.log(p2Data);
     populateCardInfo(p2Data, 'p2');
     gameId = data.guid;
     playerId = data.pid;
-    console.log(gameId);
-    console.log(playerId);
   }
 
   /**
-   * JSDOC COMMENT FILL IN LATER
+   * This is a helper function for the populateCardInfo function that populates the information
+   * specifically for the move choices, including the name, icon, and DP.
+   * @param {Object} data The response data from the cardRequest function from the pokemon data API,
+   *                      containing the pokemon information.
+   * @param {String} pToPopulate A String that will be concatenated to a # to specify if the card
+   *                             that is populating is for p1 or p2
    */
   function populateMovesInfo(data, pToPopulate) {
     // array of all the moves each pokemon has
     let movesArray = data.moves;
 
     // array of all the .move classes in html file; all of the spans containing the move name
-    // as an inline comment
     let moveNames = qsa('#' + pToPopulate + ' .move');
 
     // array of all the .dp classes in html file; all of the spans containing the dp value
-    // as an inline comment
     let moveDps = qsa('#' + pToPopulate + ' .dp');
 
-
-    // array of all the images within the .moves class in html file; all of the images that should
-    // consist of the respective icon image
+    // array of all the all of the images that should consist of the respective icon image
     let moveIcons = qsa('#' + pToPopulate + ' .moves img');
 
-    // array of all the buttons within the p1 id in html file
+    // array of all the buttons within the specific p id in html file
     let moveButtons = qsa('#' + pToPopulate + ' .moves button');
 
     // traverses through all the moves each pokemon has, specified by the JDOC data
     for (let i = 0; i < movesArray.length; i++) {
       moveButtons[i].classList.remove('hidden');
-      console.log(movesArray[i].name);
       moveNames[i].textContent = movesArray[i].name;
       moveIcons[i].src = IMG_PREPEND_URL + "icons/" + movesArray[i].type + '.jpg';
       if (moveDps[i]) {
